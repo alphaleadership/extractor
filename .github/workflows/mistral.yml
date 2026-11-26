@@ -68,7 +68,8 @@ jobs:
           ISSUE_NUMBER: ${{ steps.ctx.outputs.issue_number }}
           ISSUE_TITLE: ${{ steps.ctx.outputs.title }}
         run: |
-          curl -sf -X POST "$MISTRAL_STUDIO_WEBHOOK"             -H "Content-Type: application/json"             -d "{\"repo\": \"${{ github.repository }}\", \"ref\": \"${{ github.ref_name }}\", \"pr_number\": ${{ github.event.pull_request.number || 0 }}, \"issue_number\": $ISSUE_NUMBER, \"issue_title\": "$ISSUE_TITLE\"}"
+          jq -n --arg repo "${{ github.repository }}" --arg ref "${{ github.ref_name }}" \n                --argjson pr "${{ github.event.pull_request.number || 0 }}" \n                --argjson issue "$ISSUE_NUMBER" --arg title "$ISSUE_TITLE" \n                '{repo: $repo, ref: $ref, pr_number: $pr, issue_number: $issue, issue_title: $title}' > payload.json
+          curl -sf -X POST "$MISTRAL_STUDIO_WEBHOOK" -H "Content-Type: application/json" -d @payload.json
 
       - name: Tests e2e (générés)
         run: node --test test/e2e.test.js
