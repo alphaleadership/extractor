@@ -12,7 +12,18 @@ import os
 import subprocess
 from dataclasses import dataclass
 
+from pydantic import BaseModel, Field
+
 from mistralai.workflows import activity, workflow
+
+
+class GitHubEvent(BaseModel):
+    """Payload brut d'un événement GitHub (top-level keys)."""
+    action: str = ""
+    ref: str = "main"
+    repository: dict = Field(default_factory=dict)
+    issue: dict = Field(default_factory=dict)
+    pull_request: dict | None = None
 
 
 @dataclass
@@ -90,15 +101,14 @@ async def apply_and_commit(workdir: str, diff: str, branch: str) -> str:
 @workflow.define(name="patch_errors")
 class PatchErrors:
     @workflow.entrypoint
-    async def run(self, event: dict) -> dict:
-        # L'événement GitHub brut est passé tel quel : on en extrait les champs utiles.
-        repo = (event.get("repository") or {}).get("full_name", "alphaleadership/extractor")
+    async def run(self, event: GitHubEvent) -> dict:
+        repo = event.repository.get("full_name", "alphaleadership/extractor")
         req = PatchRequest(
             repo=repo,
-            ref=event.get("ref") or "main",
-            pr_number=(event.get("pull_request") or {}).get("number") or 0,
-            issue_number=(event.get("issue") or {}).get("number") or 0,
-            issue_title=(event.get("issue") or {}).get("title") or "",
+            ref=event.ref or "main",
+            pr_number=(event.pull_request or {}).get("number") or 0,
+            issue_number=event.issue.get("number") or 0,
+            issue_title=event.issue.get("title") or "",
         )
         workdir = await workflow.execute_activity(checkout, req.repo, req.ref)
         # Temporal: les activités s'exécutent via workflow.execute_activity
