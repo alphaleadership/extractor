@@ -61,18 +61,8 @@ jobs:
             echo "aucun correctif lint"
           fi
 
-      - name: Notifier le workflow Mistral Studio (patch_errors)
-        if: ${{ env.MISTRAL_STUDIO_WEBHOOK != '' }}
-        env:
-          MISTRAL_STUDIO_WEBHOOK: ${{ secrets.MISTRAL_STUDIO_WEBHOOK }}
-          WEBHOOK_SIGNING_SECRET: ${{ secrets.WEBHOOK_SIGNING_SECRET }}
-          ISSUE_NUMBER: ${{ steps.ctx.outputs.issue_number }}
-          ISSUE_TITLE: ${{ steps.ctx.outputs.title }}
-        run: |
-          echo '${{ toJSON(github.event) }}' > payload.json
-          SIG=$(python3 -c "import hmac,hashlib,sys; print(hmac.new(sys.argv[1].encode(), open('payload.json','rb').read(), hashlib.sha256).hexdigest())" "$WEBHOOK_SIGNING_SECRET")
-          echo "debug: secret_len=${#WEBHOOK_SIGNING_SECRET} sig_len=${#SIG} payload_bytes=$(wc -c < payload.json)"
-          curl -sS -o /dev/null -w "webhook Studio: HTTP %{http_code}" -X POST "$MISTRAL_STUDIO_WEBHOOK" -H "Content-Type: application/json" -H "X-Hub-Signature-256: sha256=$SIG" -H "X-GitHub-Event: ${{ github.event_name }}" -d @payload.json || echo "webhook Studio injoignable (non bloquant)"
+      # Notification Studio : inutile ici, le hook GitHub 717088566 délivre déjà
+      # les vrais événements signés au webhook Mistral (HTTP 202 côté Studio).
 
       - name: Tests e2e (générés)
         run: node --test test/e2e.test.js
