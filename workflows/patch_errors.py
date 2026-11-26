@@ -90,7 +90,16 @@ async def apply_and_commit(workdir: str, diff: str, branch: str) -> str:
 @workflow.define(name="patch_errors")
 class PatchErrors:
     @workflow.entrypoint
-    async def run(self, req: PatchRequest) -> dict:
+    async def run(self, event: dict) -> dict:
+        # L'événement GitHub brut est passé tel quel : on en extrait les champs utiles.
+        repo = (event.get("repository") or {}).get("full_name", "alphaleadership/extractor")
+        req = PatchRequest(
+            repo=repo,
+            ref=event.get("ref") or "main",
+            pr_number=(event.get("pull_request") or {}).get("number") or 0,
+            issue_number=(event.get("issue") or {}).get("number") or 0,
+            issue_title=(event.get("issue") or {}).get("title") or "",
+        )
         workdir = await workflow.execute_activity(checkout, req.repo, req.ref)
         # Temporal: les activités s'exécutent via workflow.execute_activity
         lint = await workflow.execute_activity(lint_fix, workdir)
