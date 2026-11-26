@@ -14,6 +14,7 @@ from dataclasses import dataclass
 
 from pydantic import BaseModel, Field
 
+import temporalio.workflow
 from mistralai.workflows import activity, workflow
 
 
@@ -110,17 +111,18 @@ class PatchErrors:
             issue_number=event.issue.get("number") or 0,
             issue_title=event.issue.get("title") or "",
         )
-        workdir = await workflow.execute_activity(checkout, req.repo, req.ref)
+        workdir = await temporalio.workflow.execute_activity(checkout, args=[req.repo, req.ref], start_to_close_timeout=temporalio.workflow.timedelta(minutes=5))
         # Temporal: les activités s'exécutent via workflow.execute_activity
-        lint = await workflow.execute_activity(lint_fix, workdir)
-        tests = await workflow.execute_activity(run_tests, workdir)
+        lint = await temporalio.workflow.execute_activity(lint_fix, args=[workdir], start_to_close_timeout=temporalio.workflow.timedelta(minutes=10))
+        tests = await temporalio.workflow.execute_activity(run_tests, args=[workdir], start_to_close_timeout=temporalio.workflow.timedelta(minutes=10))
         branch = ""
         if lint["remaining"] or not tests["ok"]:
             errors = "LINT:\n" + "\n".join(lint["remaining"][:50]) + "\nTESTS:\n" + tests["output"]
-            diff = await workflow.execute_activity(mistral_patch, workdir, errors)
+            diff = await temporalio.workflow.execute_activity(mistral_patch, args=[workdir, errors], start_to_close_timeout=temporalio.workflow.timedelta(minutes=10))
             label = req.issue_number or req.pr_number or "manual"
-            branch = await workflow.execute_activity(
-                apply_and_commit, workdir, diff, f"fix/mistral-{req.ref}-{label}")
+            branch = await temporalio.workflow.execute_activity(
+                apply_and_commit, args=[workdir, diff, f"fix/mistral-{req.ref}-{label}"],
+                start_to_close_timeout=temporalio.workflow.timedelta(minutes=10))
         return {"lint_remaining": lint["remaining"], "tests_ok": tests["ok"], "fix_branch": branch}
 
 
