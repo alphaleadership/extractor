@@ -9,7 +9,7 @@ de lint et de tests du dépôt :
 checkout → eslint --fix → node --test → (si erreurs) patch agent Mistral → branche fix/ + push
 ```
 
-- **Déclenchement** : webhook GitHub (push/PR) ou manuel depuis Studio
+- **Déclenchement** : webhook GitHub (push/PR/**issue ouverte**) ou manuel depuis Studio — l'issue ouverte à la main déclenche `.github/workflows/mistral.yml` (`issues: [opened]`), qui notifie le workflow Studio avec `issue_number`/`issue_title`
   (voir https://docs.mistral.ai/studio/workflows — orchestration déterministe,
   state longue durée, attente d'événements externes).
 - **Worker** : `pip install mistralai && python -m workflows.patch_errors`

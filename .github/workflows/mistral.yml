@@ -7,7 +7,14 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  issues:
+    types: [opened]   # déclenchement manuel à l'ouverture d'une issue
   workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Numéro d'issue à traiter (optionnel)"
+        required: false
+        default: "0"
 
 permissions:
   contents: write
@@ -26,6 +33,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Contexte du déclencheur
+        id: ctx
+        run: |
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            echo "issue_number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
+            echo "title=${{ github.event.issue.title }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "issue_number=${{ inputs.issue_number || 0 }}" >> "$GITHUB_OUTPUT"
+            echo "title=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Lint (auto-fix)
         run: npx eslint . --fix
 
@@ -42,6 +60,15 @@ jobs:
           else
             echo "aucun correctif lint"
           fi
+
+      - name: Notifier le workflow Mistral Studio (patch_errors)
+        if: ${{ env.MISTRAL_STUDIO_WEBHOOK != '' }}
+        env:
+          MISTRAL_STUDIO_WEBHOOK: ${{ secrets.MISTRAL_STUDIO_WEBHOOK }}
+          ISSUE_NUMBER: ${{ steps.ctx.outputs.issue_number }}
+          ISSUE_TITLE: ${{ steps.ctx.outputs.title }}
+        run: |
+          curl -sf -X POST "$MISTRAL_STUDIO_WEBHOOK"             -H "Content-Type: application/json"             -d "{\"repo\": \"${{ github.repository }}\", \"ref\": \"${{ github.ref_name }}\", \"pr_number\": ${{ github.event.pull_request.number || 0 }}, \"issue_number\": $ISSUE_NUMBER, \"issue_title\": "$ISSUE_TITLE\"}"
 
       - name: Tests e2e (générés)
         run: node --test test/e2e.test.js

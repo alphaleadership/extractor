@@ -27,6 +27,8 @@ class PatchRequest:
     repo: str            # ex: "alphaleadership/extractor"
     ref: str = "main"    # branche de base
     pr_number: int = 0   # PR déclencheuse (0 = manuel)
+    issue_number: int = 0  # issue ouverte à la main (0 = pas d'issue)
+    issue_title: str = ""  # titre de l'issue (contexte pour l'agent)
 
 
 @activity
@@ -107,7 +109,8 @@ def patch_errors(req: PatchRequest) -> dict:
     if lint["remaining"] or not tests["ok"]:
         errors = "LINT:\n" + "\n".join(lint["remaining"][:50]) + "\nTESTS:\n" + tests["output"]
         diff = yield mistral_patch(workdir, errors)
-        branch = yield apply_and_commit(workdir, diff, f"fix/mistral-{req.ref}-{req.pr_number or 'manual'}")
+        label = req.issue_number or req.pr_number or "manual"
+        branch = yield apply_and_commit(workdir, diff, f"fix/mistral-{req.ref}-{label}")
     return {"lint_remaining": lint["remaining"], "tests_ok": tests["ok"], "fix_branch": branch}
 
 
