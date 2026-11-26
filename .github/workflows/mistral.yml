@@ -69,7 +69,7 @@ jobs:
           ISSUE_TITLE: ${{ steps.ctx.outputs.title }}
         run: |
           jq -n --arg repo "${{ github.repository }}" --arg ref "${{ github.ref_name }}" --argjson pr "${{ github.event.pull_request.number || 0 }}" --argjson issue "$ISSUE_NUMBER" --arg title "$ISSUE_TITLE" '{repo: $repo, ref: $ref, pr_number: $pr, issue_number: $issue, issue_title: $title}' > payload.json
-          curl -sf -X POST "$MISTRAL_STUDIO_WEBHOOK" -H "Content-Type: application/json" -d @payload.json
+          curl -sS -o /dev/null -w "webhook Studio: HTTP %{http_code}" -X POST "$MISTRAL_STUDIO_WEBHOOK" -H "Content-Type: application/json" -d @payload.json || echo "webhook Studio injoignable (non bloquant)"
 
       - name: Tests e2e (générés)
         run: node --test test/e2e.test.js
