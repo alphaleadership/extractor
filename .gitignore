@@ -1,0 +1,42 @@
+node_modules/
+# fichiers de test préexistants non générés dans cette session
+test/crypto.test.js
+test/extractor.test.js
+# données/artefacts hors projet
+*.log
+*.pcap
+dump.*
+result*
+sortie.*
+test.bin
+*.7z
+*.exe
+PNG.png
+f.png
+Cahier_des_charges_2026_2027.pdf
+Liste_materiel_15092026.pdf
+FICHIERS/
+PROD/
+PROD-TD00/
+%APPDATA%/
+acars.txt
+commandes.txt.txt
+count.txt
+data
+data.json
+data.yaml
+databrut.rle
+fichier_decompile.txt
+fichier_trie.txt
+fichier_trie_unique.txt
+image_extraite.png
+log.html
+log2.html
+monflux.txt
+process.txt
+steg26.h
+steg26.rle
+stream0.yaml
+tcp.pcap
+temp.py
+to parse.txt

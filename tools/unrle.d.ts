@@ -1,0 +1,2 @@
+// unrle.d.ts
+export {};

@@ -1,0 +1,2 @@
+// hexview.d.ts
+export {};

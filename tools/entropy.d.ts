@@ -1,0 +1,2 @@
+// entropy.d.ts
+export {};

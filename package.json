@@ -1,0 +1,47 @@
+{
+  "name": "extractor",
+  "version": "2.0.0",
+  "description": "Module d'extraction et de décodage : RLE, 7 bits, Base64, hex, XOR magic bytes, stégano BMP, paquets réseau, capture tshark + outils Python DSP (tools/)",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./tools/*": {
+      "types": "./tools/*.d.ts",
+      "default": "./tools/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "src/",
+    "tools/"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "extract",
+    "decode",
+    "rle",
+    "steganography",
+    "pcap"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aes512": "^1.2.9",
+    "js-yaml": "^5.4.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.15.0",
+    "typescript": "^7.0.2"
+  },
+  "types": "index.d.ts"
+}
