@@ -108,4 +108,4 @@ class PatchErrors:
 if __name__ == "__main__":
     from mistralai.workflows import run_worker
     import asyncio
-    asyncio.run(run_worker())
+    asyncio.run(run_worker([PatchErrors]))
