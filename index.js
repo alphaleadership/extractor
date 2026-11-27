@@ -122,3 +122,32 @@ export {
     rsaVerify
 } from './src/rsa.js';
 export { generateSigningKeyPair, signData, verifyData } from './src/signature.js';
+export {
+    QPSK_POINTS,
+    QPSK_BITS,
+    MAPPINGS,
+    rrcTaps,
+    rrcMatchedFilter,
+    bandpassFilter,
+    removeCarrierFreq,
+    alignConstellation,
+    estimateSps,
+    findBestOffset,
+    sampleSymbolsFrac,
+    scanSps,
+    findBestOffsetFrac,
+    qpskDecide,
+    computeMetrics,
+    bitsToBytes,
+    bytesToHex,
+    bytesToAscii,
+    findSync,
+    decodeBestText,
+    recomposeQpsk,
+    saveRecomposedWav,
+    decodeBpskVoie,
+    mergeIqTrain,
+    decodeB64Payload,
+    writePixelsTxt,
+    demodQpsk
+} from './tools/demod_qpsk.js';

@@ -183,3 +183,36 @@ export function rsaVerify(data: BufferLike, signature: BufferLike, publicKey: un
 export function generateSigningKeyPair(): Promise<{ publicKey: string; privateKey: string }>;
 export function signData(data: BufferLike, privateKey: string): string;
 export function verifyData(data: BufferLike, signature: string, publicKey: string): boolean;
+
+// ---------- tools/demod_qpsk.js ----------
+
+export interface QpskComplex { re: number; im: number }
+
+export const QPSK_POINTS: QpskComplex[];
+export const QPSK_BITS: number[][];
+export const MAPPINGS: Record<string, number[][]>;
+
+export function rrcTaps(sps: number, beta: number, mult?: number): Float64Array;
+export function rrcMatchedFilter(samples: QpskComplex[], fs: number, baud: number, beta?: number): QpskComplex[];
+export function bandpassFilter(samples: QpskComplex[], fs: number, centerHz: number, bandwidthHz: number, order?: number): QpskComplex[];
+export function removeCarrierFreq(samples: QpskComplex[], fs: number, freqHz?: number | null): { samples: QpskComplex[]; freqEst: number };
+export function alignConstellation(samples: QpskComplex[]): { samples: QpskComplex[]; corrDeg: number };
+export function estimateSps(samples: QpskComplex[], fs: number, minSps?: number, maxSps?: number): number;
+export function findBestOffset(samples: QpskComplex[], sps: number): number;
+export function sampleSymbolsFrac(samples: QpskComplex[], spsFloat: number, offsetFrac?: number): QpskComplex[];
+export function scanSps(samples: QpskComplex[], fs: number, minSps?: number, maxSps?: number, topN?: number): Array<{ sps: number; offset: number; evmPct: number; snrDb: number; baud: number }>;
+export function findBestOffsetFrac(samples: QpskComplex[], spsFloat: number, nSteps?: number): { offset: number; evm: number };
+export function qpskDecide(symbols: QpskComplex[]): { decided: QpskComplex[]; indices: number[]; bits: number[] };
+export function computeMetrics(symbols: QpskComplex[], decided: QpskComplex[], bits: number[]): Record<string, unknown>;
+export function bitsToBytes(bits: number[]): number[];
+export function bytesToHex(d: number[], limit?: number): string;
+export function bytesToAscii(d: number[], limit?: number): string;
+export function findSync(bits: number[], preamble?: string): number;
+export function decodeBestText(indices: number[], marker?: string): Record<string, unknown>;
+export function recomposeQpsk(decided: QpskComplex[], spsFloat: number, fs: number, offset?: number, rrcBeta?: number | null): QpskComplex[];
+export function saveRecomposedWav(decided: QpskComplex[], spsFloat: number, fs: number, file: string, offset?: number): string;
+export function decodeBpskVoie(voie: ArrayLike<number>, fs: number, baud: number, marker?: string | null, tol?: number): Record<string, unknown>;
+export function mergeIqTrain(chaineI: Buffer, chaineQ: Buffer, searchShift?: boolean): { train: Buffer; shift: number; score: number };
+export function decodeB64Payload(train: Buffer): { text: string | null; nums: number[] };
+export function writePixelsTxt(nums: number[], txtPath: string, rawText?: string | null): number;
+export function demodQpsk(file: string, opts?: Record<string, unknown>): Record<string, unknown>;
